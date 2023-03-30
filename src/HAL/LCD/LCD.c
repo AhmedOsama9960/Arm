@@ -24,10 +24,12 @@
 
 #define second_line				2
 #define first_place				0
+
+#define No_Of_DataPins			8
 /******************************************Declaration ****************************************************/
-u8 init_Done = 0;
 static u8 state = Init_1;
-u8 ReqType = ReqType_NoReq;
+u8 ReqType      = ReqType_NoReq;
+u8 init_Done;
 u8 Counter_Writing;
 
 static LCD_t LCD_Storage;
@@ -35,50 +37,65 @@ extern const Lcd_cfg_t Lcd_cfg[LCD_Pins_Counts];
 
 /***************************************Implementations********************************************************/
 /*
------------                   ----------
-| ATmega32  |                 |   LCD    |
+-------------                -------------
+|STM32F401  |                 |   LCD    |
 |           |                 |          |
-|        PD7|---------------->|D7        |
-|        PD6|---------------->|D6        |
-|        PD5|---------------->|D5        |
-|        PD4|---------------->|D4        |
-|        PD3|---------------->|D3        |
-|        PD2|---------------->|D2        |
-|        PD1|---------------->|D1        |
-|        PD0|---------------->|D0        |
+|        PA7|---------------->|D7        |
+|        PA6|---------------->|D6        |
+|        PA5|---------------->|D5        |
+|        PA4|---------------->|D4        |
+|        PA3|---------------->|D3        |
+|        PA2|---------------->|D2        |
+|        PA1|---------------->|D1        |
+|        PA0|---------------->|D0        |
 |           |                 |          |
-|        PA2|---------------->|E         |
-|        PA1|---------------->|RW        |
-|        PA0|---------------->|RS        |
+|       PB12|---------------->|E         |
+|       PB13|---------------->|RW       |
+|       PB14|---------------->|RS        |
 -----------                   ----------
 */
 /*------------------------------------Commands -------------------------------*/
 void LCD_voidWriteCommand(s8 Copy_s8Command)	//its used to write the command
 {
-	GPIO_Port_Value(LCD_DataGroup , Copy_s8Command);
+	//GPIO_Port_Value(LCD_DataGroup , Copy_s8Command);
+	u8 indx;
+	u8 Data_Value;
+	for(indx = 0 ; indx < No_Of_DataPins ; indx++)
+	{
+		Data_Value = Copy_s8Command>>indx & 1;
+		GPIO_Write_PinValue(Lcd_cfg[indx].port , Lcd_cfg[indx].BSRR_Pin , Data_Value);
+	}
 
 	GPIO_Write_PinValue(Lcd_cfg[LCD_ControlRS].port, Lcd_cfg[LCD_ControlRS].BSRR_Pin , low ^ Lcd_cfg[LCD_ControlRS].circuit_type);		// set it 0 for command Register
 	GPIO_Write_PinValue(Lcd_cfg[LCD_ControlRW].port, Lcd_cfg[LCD_ControlRW].BSRR_Pin , low ^ Lcd_cfg[LCD_ControlRS].circuit_type);		// set it 0 for write status
-	GPIO_Write_PinValue(Lcd_cfg[LCD_ControlE].port, Lcd_cfg[LCD_ControlE].BSRR_Pin  , high ^ Lcd_cfg[LCD_ControlRS].circuit_type);		// Enable the control
-	GPIO_Write_PinValue(Lcd_cfg[LCD_ControlE].port, Lcd_cfg[LCD_ControlE].BSRR_Pin  , low  ^ Lcd_cfg[LCD_ControlRS].circuit_type);		// Enable the control
+	GPIO_Write_PinValue(Lcd_cfg[LCD_ControlE].port, Lcd_cfg[LCD_ControlE].BSRR_Pin   , high^ Lcd_cfg[LCD_ControlRS].circuit_type);		// Enable the control
+	GPIO_Write_PinValue(Lcd_cfg[LCD_ControlE].port, Lcd_cfg[LCD_ControlE].BSRR_Pin   , low ^ Lcd_cfg[LCD_ControlRS].circuit_type);		// Enable the control
 }
 
 void LCD_voidWriteData(s8 Copy_s8Data)
 {
-	GPIO_Port_Value(LCD_DataGroup , Copy_s8Data);
-	//trace_printf("WritingNow");
+	//GPIO_Port_Value(LCD_DataGroup , Copy_s8Data);
+
+	u8 indx;
+	u8 Data_Value;
+	for(indx = 0 ; indx < No_Of_DataPins ; indx++)
+	{
+		Data_Value = Copy_s8Data>>indx & 1;
+		GPIO_Write_PinValue(Lcd_cfg[indx].port , Lcd_cfg[indx].BSRR_Pin , Data_Value);
+	}
+
 	GPIO_Write_PinValue(Lcd_cfg[LCD_ControlRS].port, Lcd_cfg[LCD_ControlRS].BSRR_Pin , high ^ Lcd_cfg[LCD_ControlRS].circuit_type);		// set it 0 for command Register
 	GPIO_Write_PinValue(Lcd_cfg[LCD_ControlRW].port, Lcd_cfg[LCD_ControlRW].BSRR_Pin , low  ^ Lcd_cfg[LCD_ControlRS].circuit_type);		// set it 0 for write status
-	GPIO_Write_PinValue(Lcd_cfg[LCD_ControlE].port, Lcd_cfg[LCD_ControlE].BSRR_Pin  , high  ^ Lcd_cfg[LCD_ControlRS].circuit_type);		// Enable the control
-	GPIO_Write_PinValue(Lcd_cfg[LCD_ControlE].port, Lcd_cfg[LCD_ControlE].BSRR_Pin  , low   ^ Lcd_cfg[LCD_ControlRS].circuit_type);		// Enable the control
+	GPIO_Write_PinValue(Lcd_cfg[LCD_ControlE].port , Lcd_cfg[LCD_ControlE].BSRR_Pin  , high ^ Lcd_cfg[LCD_ControlRS].circuit_type);		// Enable the control
+	GPIO_Write_PinValue(Lcd_cfg[LCD_ControlE].port , Lcd_cfg[LCD_ControlE].BSRR_Pin  , low  ^ Lcd_cfg[LCD_ControlRS].circuit_type);		// Enable the control
 }
 
 
 void LCD_Pins_Init(void)
 {
 	GPIO_init_t GPIO_cfg;
-
-	for(u8 indx = 0; indx <LCD_Pins_Counts; indx++)
+	u8 indx;
+	for(indx = 0; indx <LCD_Pins_Counts; indx++)
 	{
 		GPIO_cfg.Mode			 = Lcd_cfg[indx].mode;			/* Mode_out*/
 		GPIO_cfg.Pin 			 = Lcd_cfg[indx].pin;			/* No of pin */
@@ -86,6 +103,7 @@ void LCD_Pins_Init(void)
 		GPIO_cfg.Speed			 = Lcd_cfg[indx].speed;			/* Speed Range */
 		GPIO_cfg.Circuit_Type 	 = Lcd_cfg[indx].circuit_type;	/* active high or active low */
 		GPIO_cfg.PUPD 			 = Lcd_cfg[indx].PUPD;			/* Pull up or Push Down or no pull up or down*/
+		GPIO_cfg.AFValue		 = 0;
 		GPIO_Init_Pin(&GPIO_cfg);
 	}
 }
