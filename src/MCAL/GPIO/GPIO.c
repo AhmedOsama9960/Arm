@@ -38,10 +38,21 @@ GPIO_init_t Led_Pin;
 
 void GPIO_Init_Pin(GPIO_init_t * Init_Pins)
 {
+
 		((GPIO_Register*)Init_Pins->Port)->GPIO_x_Moder  |= (Init_Pins->Mode)<<(Init_Pins->Pin);
 		((GPIO_Register*)Init_Pins->Port)->GPIO_x_OSpeed |= (Init_Pins->Speed)<<(Init_Pins->Pin);
 		((GPIO_Register*)Init_Pins->Port)->GPIO_x_Otyper |= Init_Pins->Circuit_Type;
 		((GPIO_Register*)Init_Pins->Port)->GPIO_x_PUPDR  |= (Init_Pins->PUPD)<<(Init_Pins->Pin);
+		if(Init_Pins->AFValue != 0)
+		{
+			if(Init_Pins->Pin <= pin_7)
+			{
+				((GPIO_Register*)Init_Pins->Port)->GPIO_x_AFRL = (Init_Pins->AFValue)<<((Init_Pins->Pin)*2);
+			} else {
+				((GPIO_Register*)Init_Pins->Port)->GPIO_x_AFRH = (Init_Pins->AFValue)<<((Init_Pins->Pin)*2);
+			}
+		}
+
 }
 void GPIO_Init(void)
 {

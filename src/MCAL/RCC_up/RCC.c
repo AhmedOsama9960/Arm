@@ -259,7 +259,16 @@ Error_State	RCC_EnuSelect_Clock (u8 Clock_Selection)
 void RCC_voidEnablePeri(u8 Peri_Name)
 {
 	/* Set bits by bit masking */
+	if(Peri_Name == GPIOAEn || Peri_Name == GPIOBEn || Peri_Name == DMA1En)
+	{
+		//RCC_AHB1
 	RCC_Reg->RCC_AHB1_Enable |= Peri_Name;
+
+	} else if (Peri_Name == USART1En) {
+		//RCC_AHB1
+	RCC_Reg->RCC_APB2_Enable |= Peri_Name;
+
+	}
 }
 
 void RCC_voidDisablePeri(u8 Peri_Name)
