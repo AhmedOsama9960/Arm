@@ -57,6 +57,7 @@
 
 /*RCC_APB2 */
 
+#define USART1En		0x10
 #define TIM1En			0x01
 
 /* -------------- RCC_PLLCFG----------------*/

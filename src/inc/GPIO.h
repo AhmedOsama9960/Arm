@@ -28,6 +28,7 @@ typedef struct {
 	u8 Mode;
 	u8 PUPD;
 	u8 Circuit_Type;
+	u8 AFValue;
 }GPIO_init_t;
 
 
