@@ -37,6 +37,9 @@
 #include "diag/Trace.h"
 #include "stm32f401xc.h"
 #include "inc/Sched.h"
+#include "inc/UART.h"
+#include "inc/NVIC_STM.h"
+
 
 /*****************************Define *************************************/
 #define	Led_1	1
@@ -89,16 +92,17 @@ main(int argc, char* argv[])
 
 /*-------------------- Scheduler --------------------*/
 	// Clock Tree
-	u8 state =	RCC_EnuSelect_Clock(Clock_HSE);
+	u8 state =	RCC_EnuSelect_Clock(Clock_HSI);
 	if(state == Ok) {
 	RCC_voidEnablePeri(GPIOAEn);
 	RCC_voidEnablePeri(GPIOBEn);
+	RCC_voidEnablePeri(USART1En);
 	}
 
 	//Initialization
 	if(state == Ok) {
-	led_init();
-	Switch_Init();
+	NVIC_IRQ_Enable(USART1_IRQ);
+	UART_init();
 	LCD_Pins_Init();
 	}
 
