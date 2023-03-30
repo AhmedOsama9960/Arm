@@ -12,6 +12,8 @@
 #include "../inc/LCD.h"
 #include "../My_Lib/Typedef.h"
 #include "../inc/Switch.h"
+#include "../inc/UART.h"
+#include <stdlib.h>
 
 /*---------------------------------------- Define---------------------------------*/
 #define high	    1
@@ -34,6 +36,10 @@ static u8 counter2 = high;
 static u8 counter3 = high;
 static u8 switch_value = unpressed;
 
+u8 buffer_UART = 0;
+u8 size = 5;
+
+char buffer[5];
 /*---------------------------------------- Implementations------------------------*/
 
 void LED1(void)		//Every 3000ms
@@ -101,12 +107,26 @@ void Switch(void)			//Every 20ms
 
 void LCD_App(void)
 {
-	u8 res;
-	if(switch_value == Pressed){
+	/*u8 res;
+	if(switch_value == 1){
 	res = Lcd_writestringAsync("RamadanKareem" , 13 , 1 , 1 );
 	//trace_printf("Res = %d\n",res);
 	//write_seq();
 	} else {
 		LCD_Clear();
-	}
+	}*/
+
+
+	itoa(buffer_UART, buffer, 10);
+	Lcd_writestringAsync(buffer , 3 , 1 , 5 );
+	Lcd_writestringAsync("Value from RX :" , 16 , 2 , 0 );
+
 }
+
+void USART_App(void)
+{
+	UART_Recieve_Buffer(&buffer_UART , size);
+}
+
+
+

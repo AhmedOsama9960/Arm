@@ -19,4 +19,7 @@ void DebouncingSwitch(void);
 void Switch(void);
 
 void LCD_App(void);
+
+void USART_App(void);
+
 #endif /* SCHEDULER_SCHEDLER_FUNCTIONS_H_ */

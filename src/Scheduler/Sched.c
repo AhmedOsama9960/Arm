@@ -17,7 +17,12 @@
 /**---------------------------------------------Define------------------------------------------------*/
 
 #define _25MHz				25000000
+#define _16MHz				16000000
+
+#define System_Hz			_16MHz
+
 #define _5Ms				5
+
 
 /*----------------------------------------- Declaration----------------------------------------------*/
 // Type of Task
@@ -33,7 +38,7 @@ u8 index;
 void Sched_init(void)
 {
 	// Config for Systick
-	Systick_Set_Period_MS(_5Ms , _25MHz);
+	Systick_Set_Period_MS(_5Ms , System_Hz);
 	Systick_Set_CBF(Tick_CBF);
 
 	// Tasks
@@ -91,10 +96,8 @@ void Tick_CBF(void)
 	if(Sched_Flag == 0)
 	{
 		Sched_Flag = 1;
-	}
-	else
-	{
-		trace_printf("CPULOAD = %d\n",CPU_LOAD);
+	} else {
+		//trace_printf("CPULOAD = %d\n",CPU_LOAD);
 		CPU_LOAD++;
 	}
 }
